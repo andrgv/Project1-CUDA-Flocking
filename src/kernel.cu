@@ -516,7 +516,7 @@ __global__ void kernUpdateVelNeighborSearchScattered(
   glm::vec3 ret_rule3;
   if (r3_neighbors) {
     perceived_velocity /= r3_neighbors;
-    glm::vec3 ret_rule3 = perceived_velocity * rule3Scale;
+    ret_rule3 = perceived_velocity * rule3Scale;
   }
   
   
@@ -642,7 +642,7 @@ __global__ void kernUpdateVelNeighborSearchCoherent(
   glm::vec3 ret_rule3;
   if (r3_neighbors) {
     perceived_velocity /= r3_neighbors;
-    glm::vec3 ret_rule3 = perceived_velocity * rule3Scale;
+    ret_rule3 = perceived_velocity * rule3Scale;
   }
   
   glm::vec3 updated_vel = vel1[i] + ret_rule1 + ret_rule2 + ret_rule3;
