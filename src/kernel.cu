@@ -445,11 +445,24 @@ __global__ void kernUpdateVelNeighborSearchScattered(
   glm::vec3 perceived_center;
   glm::vec3 c;
   glm::vec3 perceived_velocity;
-  float max_distance = cellWidth * 0.5;
 
-  for (int x = -1; x <= 1; ++x) {
-    for (int y = -1; y <= 1; ++y) {
-      for (int z = -1; z <= 1; ++z) {
+  // actually just check the 8 neighboring cells to the current octant
+  glm::vec3 cell_center = cellWidth * (glm::vec3(curr_pos) + glm::vec3(0.5))+ gridMin;
+
+  int dx = pos[i].x < cell_center.x ? -1 : 1;
+  int dy = pos[i].y < cell_center.y ? -1 : 1;
+  int dz = pos[i].z < cell_center.z ? -1 : 1;
+
+  int start_x = min(0, dx);
+  int end_x = max(0, dx);
+  int start_y = min(0, dy);
+  int end_y = max(0, dy);
+  int start_z = min(0, dz);
+  int end_z = max(0, dz);
+
+  for (int x = start_x; x <= end_x; ++x) {
+    for (int y = start_y; y <= end_y; ++y) {
+      for (int z = start_z; z <= end_z; ++z) {
         glm::ivec3 neighbor_cell = curr_pos + glm::ivec3(x, y, z);
 
         if (
@@ -460,15 +473,7 @@ __global__ void kernUpdateVelNeighborSearchScattered(
             //oob or same
             continue;
         }
-
-        glm::vec3 cell_min = gridMin + glm::vec3(neighbor_cell) * cellWidth;
-        glm::vec3 cell_max = cell_min + glm::vec3(cellWidth);
-        glm::vec3 closest = glm::clamp(pos[i], cell_min, cell_max);
-        glm::vec3 cell_offset = closest - pos[i];
-        if (glm::length(cell_offset) > max_distance) {
-          continue;
-        }
-
+        
         int cell_num = gridIndex3Dto1D(neighbor_cell.x, neighbor_cell.y, neighbor_cell.z, gridResolution);
         
         // - For each cell, read the start/end indices in the boid pointer array.
@@ -571,11 +576,22 @@ __global__ void kernUpdateVelNeighborSearchCoherent(
   glm::vec3 perceived_center;
   glm::vec3 c;
   glm::vec3 perceived_velocity;
-  float max_distance = cellWidth * 0.5;
+  glm::vec3 cell_center = cellWidth * (glm::vec3(curr_pos) + glm::vec3(0.5))+ gridMin;
 
-  for (int x = -1; x <= 1; ++x) {
-    for (int y = -1; y <= 1; ++y) {
-      for (int z = -1; z <= 1; ++z) {
+  int dx = pos[i].x < cell_center.x ? -1 : 1;
+  int dy = pos[i].y < cell_center.y ? -1 : 1;
+  int dz = pos[i].z < cell_center.z ? -1 : 1;
+
+  int start_x = min(0, dx);
+  int end_x = max(0, dx);
+  int start_y = min(0, dy);
+  int end_y = max(0, dy);
+  int start_z = min(0, dz);
+  int end_z = max(0, dz);
+
+  for (int x = start_x; x <= end_x; ++x) {
+    for (int y = start_y; y <= end_y; ++y) {
+      for (int z = start_z; z <= end_z; ++z) {
         glm::ivec3 neighbor_cell = curr_pos + glm::ivec3(x, y, z);
 
         if (
@@ -587,13 +603,6 @@ __global__ void kernUpdateVelNeighborSearchCoherent(
             continue;
         }
 
-        glm::vec3 cell_min = gridMin + glm::vec3(neighbor_cell) * cellWidth;
-        glm::vec3 cell_max = cell_min + glm::vec3(cellWidth);
-        glm::vec3 closest = glm::clamp(pos[i], cell_min, cell_max);
-        glm::vec3 cell_offset = closest - pos[i];
-        if (glm::length(cell_offset) > max_distance) {
-          continue;
-        }
 
         int cell_num = gridIndex3Dto1D(neighbor_cell.x, neighbor_cell.y, neighbor_cell.z, gridResolution);
         
